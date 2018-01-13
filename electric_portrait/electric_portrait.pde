@@ -19,7 +19,7 @@ void setup() {
   size(839, 1000, P2D);
   noSmooth();
   stroke(0, 15);
-  strokeWeight(3);
+  strokeWeight(1);
   strokeJoin(ROUND);
 
   background(0);
@@ -88,7 +88,7 @@ int determineStrokeColor(PVector[] pathPoints) {
 }
 
 int determineStrokeAlpha(PVector[] pathPoints) {
-  return 170;
+  return 255;
 }
 
 PVector[] complexifyPath(PVector[] pathPoints){
