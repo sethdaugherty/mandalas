@@ -13,25 +13,31 @@ int focalY;
 float lengthDeviation;
 float fineLengthDeviation;
 
-void setup() {
-  img = loadImage("rembrandt.jpg");
+PGraphics pg;
 
-  size(839, 1000, P2D);
+void setup() {
+  // size: 1258 by 1500
+  img = loadImage("rembrandt_large.jpg");
+  pg = createGraphics(1258, 1500);
+
+  size(629, 750, P2D);
+  //size(1258, 1500, P2D);
   noSmooth();
   stroke(0, 15);
   strokeWeight(1);
   strokeJoin(ROUND);
-
   background(0);
 
-  pathPoints = new PVector[width];
+  pathPoints = new PVector[pg.width];
   focalX = -1;
   focalY = -1;
-  lengthDeviation = width / 5;
-  fineLengthDeviation = width / 10;
+  lengthDeviation = pg.width / 5;
+  fineLengthDeviation = pg.width / 10;
 }
 
 void draw() {
+  pg.beginDraw();
+  
   pathPoints = imgPoints();
   for(int j=0;j<6;j++){
      pathPoints = complexifyPath(pathPoints);
@@ -39,32 +45,46 @@ void draw() {
 
   int strokeAlpha = determineStrokeAlpha(pathPoints);
   int strokeColor = determineStrokeColor(pathPoints);
-  stroke(strokeColor, strokeAlpha);
-
-  noFill();
-  beginShape();
+  
+  pg.stroke(strokeColor, strokeAlpha);
+  pg.noFill();
+  pg.beginShape();
   for(int i=0;i<pathPoints.length;i++){
     PVector v = pathPoints[i];
-    vertex(v.x, v.y);
+    pg.vertex(v.x, v.y);
   }
-  endShape();
+  pg.endShape();
+  
+  if (lineCount % 10 == 0) {
+    stroke(strokeColor, strokeAlpha);
+    noFill();
+    beginShape();
+    for(int i=0;i<pathPoints.length;i++){
+      PVector v = pathPoints[i];
+      vertex(v.x/2, v.y/2);
+    }
+    endShape();
+  }
 
   lineCount = lineCount + 1;
   
   if (lineCount % 1000 == 0) {
     println("Line count", lineCount);
+    pg.save("renders/render_" + lineCount + ".jpg");
   }
+  
+  pg.endDraw();
 }
 
 void mouseClicked() {
-  if (focalX == mouseX) {
+  if (focalX == mouseX*2) {
     fineLengthDeviation = fineLengthDeviation / 2;
   }
   else {
-    fineLengthDeviation = width/10; 
+    fineLengthDeviation = pg.width/10; 
   }
-  focalX = mouseX;
-  focalY = mouseY;
+  focalX = mouseX * 2;
+  focalY = mouseY * 2;
 }
 
 void keyPressed() {
@@ -130,8 +150,8 @@ PVector[] imgPoints() {
     y2 = y1 + randomGaussian() * fineLengthDeviation;
   }
   else {
-    x1 = random(img.width);
-    y1 = random(img.height);
+    x1 = random(pg.width);
+    y1 = random(pg.height);
     x2 = x1 + randomGaussian() * lengthDeviation;
     y2 = y1 + randomGaussian() * lengthDeviation;
   }
