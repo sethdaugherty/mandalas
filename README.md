@@ -1,3 +1,3 @@
 # Mandalas
 
-Sketches in electrons. 
+Sketches in the medium of electrons. 
