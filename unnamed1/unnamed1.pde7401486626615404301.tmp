@@ -1,0 +1,198 @@
+color[] palette;
+
+void setup() {
+  // Set up the color palette
+  palette = new color[5];
+  // http://colorpalettes.net/color-palette-3642/
+  palette[0] = #06397d;
+  palette[1] = #82add6;
+  palette[2] = #e4e9f4;
+  palette[3] = #facb66;
+  palette[4] = #911f1e;
+  
+  // palette = [];
+  size(640, 640);
+  
+  noLoop();
+}
+
+void draw() {
+  background(randomPaletteColor());
+  
+  float triangleCount = 15.0;
+  float radius = 200;
+  randomFillAndStroke();
+  //triangleRing(triangleCount, 180, 50, 100);
+  convexTriangleRing(triangleCount, 180, 50, 100);
+  randomFillAndStroke();
+  triangleRing(triangleCount, 100, 20, 25);
+  randomFillAndStroke();
+  circleRing(triangleCount*2, 130, 10);
+  randomFillAndStroke();
+  lineRing(triangleCount, 100, 25);
+  randomFillAndStroke();
+  lineRing(triangleCount*2, 100, 25);
+  randomFillAndStroke();
+  emptyRing(100);
+  randomFillAndStroke();
+  emptyRing(140);
+  randomFillAndStroke();
+  rectRing(triangleCount*2, 140, 10, 40);
+  randomFillAndStroke();
+  emptyRing(180);
+  randomFillAndStroke();
+
+}
+
+void circleRing(float count, float ringRadius, float circleRadius) {
+  pushMatrix();
+  translate(width*0.5, height*0.5);
+
+  for (int i=0; i < count; i++ ) {
+    translate(0, ringRadius);
+    ellipse(0, 0, circleRadius, circleRadius);
+    translate(0, -ringRadius);
+    rotate(TWO_PI / count);
+  }
+
+  popMatrix();
+}
+
+void rectRing(float count, float radius, float baseLen, float sideLen) {
+  pushMatrix();
+  translate(width*0.5, height*0.5);
+
+  for (int i=0; i < count; i++ ) {
+    translate(0, radius);
+    rect(baseLen/2, 0, baseLen, sideLen);
+    translate(0, -radius);
+    rotate(TWO_PI / count);
+  }
+
+  popMatrix();
+}
+
+void triangleRing(float count, float radius, float baseLen, float sideLen) {
+  pushMatrix();
+  translate(width*0.5, height*0.5);
+
+  for (int i=0; i < count; i++ ) {
+    translate(0, radius);
+    isoTriangle(baseLen, sideLen);
+    translate(0, -radius);
+    rotate(TWO_PI / count);
+  }
+
+  popMatrix();
+}
+
+void convexTriangleRing(float count, float radius, float baseLen, float sideLen) {
+  pushMatrix();
+  translate(width*0.5, height*0.5);
+
+  for (int i=0; i < count; i++ ) {
+    translate(0, radius);
+    convexTriangle(baseLen, sideLen);
+    translate(0, -radius);
+    rotate(TWO_PI / count);
+  }
+
+  popMatrix();
+}
+
+void emptyRing(float radius) {
+  pushMatrix();
+  noFill();
+  translate(width*0.5, height*0.5);
+  arc(0, 0, radius*2, radius*2, 0, TWO_PI);
+  popMatrix();
+}
+
+void lineRing(float count, float radius, float lineLen) {
+  pushMatrix();
+  translate(width*0.5, height*0.5);
+
+  for (int i=0; i < count; i++ ) {
+    translate(0, radius);
+    line(0, 0, 0, lineLen);
+    translate(0, -radius);
+    rotate(TWO_PI / count);
+  }
+
+  popMatrix();
+}
+
+// Triangle with sides rounded outward
+void convexTriangle(float baseLen, float sideLen) {
+  beginShape();
+  float sx = baseLen / 2;
+  float sy = 0;
+  vertex(sx, sy);
+  
+  sx = -baseLen / 2;
+  sy = 0;
+  vertex(sx, sy);
+  curveVertex(sx, sy);
+  curveVertex(sx, sy);
+ 
+  sx = 0;
+  sy = sqrt( pow(sideLen, 2) - pow(0.5*baseLen, 2));
+
+  curveVertex(sx-sx/2, sx);
+  
+  sx = 0;
+  sy = sqrt( pow(sideLen, 2) - pow(0.5*baseLen, 2));
+  // sidelen^2 = x^2 + (.5*baseLen)^2
+  curveVertex(sx, sy);
+  curveVertex(sx, sy);
+  vertex(sx, sy);
+ 
+  endShape(CLOSE);
+}
+
+void isoTriangle(float baseLen, float sideLen) {
+  beginShape();
+  float sx = baseLen / 2;
+  float sy = 0;
+  vertex(sx, sy);
+  
+  sx = -baseLen / 2;
+  sy = 0;
+  vertex(sx, sy);
+ 
+  sx = 0;
+  sy = sqrt( pow(sideLen, 2) - pow(0.5*baseLen, 2));
+  // sidelen^2 = x^2 + (.5*baseLen)^2
+  vertex(sx, sy);
+ 
+  endShape(CLOSE);
+}
+
+void polygon(float x, float y, float radius, int npoints) {
+  float angle = TWO_PI / npoints;
+  beginShape();
+  for (float a = 0; a < TWO_PI; a += angle) {
+    float sx = x + cos(a) * radius;
+    float sy = y + sin(a) * radius;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
+}
+
+
+void randomFillAndStroke() {
+  randomFill();
+  randomStroke();
+}
+
+void randomFill() {
+  fill( randomPaletteColor() ); 
+}
+
+void randomStroke() {
+  stroke(randomPaletteColor());
+}
+
+color randomPaletteColor() {
+  return palette[int(random(palette.length))];
+}
