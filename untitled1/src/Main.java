@@ -127,12 +127,14 @@ public class Main extends PApplet {
 
     float randomBaseRing(float count, float radius, float shapeSize) {
 
-        int shape = (int) random(2);
+        int shape = (int) random(3);
 //shape=7;
         if (shape == 0) {
-            pointedPetalRing(count, radius, shapeSize);
+            linedArcRing(count, radius, shapeSize);
         } else if (shape == 1) {
-            sharpPetalRing(count, radius, shapeSize);
+            linedArcRing(count, radius, shapeSize);
+        } else if (shape == 2) {
+            linedArcRing(count, radius, shapeSize);
         }
 
         return radius - shapeSize;
@@ -216,6 +218,29 @@ public class Main extends PApplet {
             translate(0, -ringRadius);
             rotate(TWO_PI / count);
         }
+
+        popMatrix();
+    }
+
+    void linedArcRing(float count, float ringRadius, float petalSize) {
+        pushMatrix();
+        translate(width*0.5f, height*0.5f);
+
+        for (int i=0; i < count; i++ ) {
+            translate(0, ringRadius);
+            arc(0, 0, petalSize, petalSize, 0, PI, PIE);
+            translate(0, -ringRadius);
+            rotate(TWO_PI / count);
+        }
+
+        pushMatrix();
+        for (int i=0; i < count; i++ ) {
+            translate(0, ringRadius);
+            line(0, 0, petalSize, 0);
+            translate(0, -ringRadius);
+            rotate(TWO_PI / count);
+        }
+        popMatrix();
 
         popMatrix();
     }
