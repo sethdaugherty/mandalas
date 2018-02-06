@@ -1,4 +1,14 @@
+package io.sethdaugherty.mandala.untitled1;
+
+import io.sethdaugherty.mandala.untitled1.shape.FilledArc;
+import io.sethdaugherty.mandala.untitled1.shape.MandalaShape;
+import io.sethdaugherty.mandala.untitled1.shape.NestedShape;
+import io.sethdaugherty.mandala.untitled1.shape.Petal;
+import io.sethdaugherty.mandala.untitled1.shape.factory.RingFactory;
 import processing.core.PApplet;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main extends PApplet {
     int[] palette;
@@ -7,7 +17,7 @@ public class Main extends PApplet {
     boolean shouldRedraw = true;
 
     public static void main(String[] args) {
-        PApplet.main("Main", args);
+        PApplet.main("io.sethdaugherty.mandala.untitled1.Main", args);
     }
 
     public void settings() {
@@ -63,6 +73,38 @@ public class Main extends PApplet {
     }
 
     private void drawMandala() {
+        palette = paletteLibrary[ (int)(random(paletteLibrary.length)) ];
+
+        background(56);
+
+        //RingFactory.createRandomRing(this, 280f, 30).draw();
+        //RingFactory.createRandomRing(this, 280f, 60).draw();
+        //RingFactory.createRandomRing(this, 200f, 30).draw();
+
+        int count = (int) random(10, 20);
+        float radius = width/2 - 200;
+
+        // Option 1: draw a specific shape
+        randomFillAndStroke();
+
+        //RingFactory.createRing(this, radius, count, factory3).draw(this);
+
+        // Option 2: draw a random ring
+        randomFillAndStroke();
+        //RingFactory.createRandomRing(this, radius, count).draw();
+
+        // Option 3: draw the full mandala
+
+        int baseRingCount = 3;
+        for ( int i =0; i < baseRingCount; i++ ) {
+            randomFillAndStroke();
+            RingFactory.createRandomRing(this, radius, count).draw(this);
+            radius = radius*.8f;
+        }
+
+    }
+
+    private void drawMandala2() {
         palette = paletteLibrary[ (int)(random(paletteLibrary.length)) ];
 
         background(56);
