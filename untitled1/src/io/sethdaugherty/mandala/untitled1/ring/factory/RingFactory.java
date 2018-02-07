@@ -1,9 +1,6 @@
-package io.sethdaugherty.mandala.untitled1.shape.factory;
+package io.sethdaugherty.mandala.untitled1.ring.factory;
 
-import io.sethdaugherty.mandala.untitled1.ring.BasicShapeRing;
-import io.sethdaugherty.mandala.untitled1.ring.CircleRing;
-import io.sethdaugherty.mandala.untitled1.ring.MandalaRing;
-import io.sethdaugherty.mandala.untitled1.ring.StrokedRing;
+import io.sethdaugherty.mandala.untitled1.ring.*;
 import io.sethdaugherty.mandala.untitled1.shape.*;
 import io.sethdaugherty.mandala.untitled1.TriFunction;
 import processing.core.PApplet;
@@ -13,17 +10,22 @@ import java.util.function.Function;
 
 public class RingFactory {
 
-    private static final List<Function<Float, ? extends MandalaShape>> shapeFactories = setupShapeFactories();
     private static final List<TriFunction<Float, Integer, MandalaShape, ? extends MandalaRing>> ringFactories = setupRingFactories();
 
     private static List<TriFunction<Float,Integer,MandalaShape,? extends MandalaRing>> setupRingFactories() {
         List<TriFunction<Float, Integer, MandalaShape, ? extends MandalaRing>> ringFactories = new ArrayList<>();
         ringFactories.add((Float radius, Integer count, MandalaShape shape) -> new BasicShapeRing(radius, count, shape));
+        ringFactories.add((Float radius, Integer count, MandalaShape shape) -> new BasicShapeRing(radius, count, shape)); // We want lots of these, so double up
         ringFactories.add((Float radius, Integer count, MandalaShape shape) -> new CircleRing(radius));
+        ringFactories.add((Float radius, Integer count, MandalaShape shape) -> new DotRing(radius, (radius/count)*.9f, count));
+        ringFactories.add((Float radius, Integer count, MandalaShape shape) -> new DotRing(radius, (radius/count)*.7f, count*2));
         ringFactories.add((Float radius, Integer count, MandalaShape shape) -> new StrokedRing(radius, new BasicShapeRing(radius, count, shape)));
+
 
         return ringFactories;
     }
+
+
 
 
     // This is intended to be used for testing a specific type of ring
@@ -55,18 +57,7 @@ public class RingFactory {
     }
 
     private static MandalaShape createRandomShape(float shapeSize) {
-        int randomElement = new Random().nextInt(shapeFactories.size());
-        return shapeFactories.get(randomElement).apply(shapeSize);
-    }
-
-    private static List<Function<Float, ? extends MandalaShape>> setupShapeFactories() {
-        List<Function<Float, ? extends MandalaShape>> shapeFactories = new ArrayList<>();
-        shapeFactories.add((Float size) -> new Petal(size));
-        shapeFactories.add((Float size) -> new FilledArc(size));
-        shapeFactories.add((Float size) -> new NestedShape(new Petal(size), new FilledArc(size-10)));
-        shapeFactories.add((Float size) -> new NestedShape(new FilledArc(size), new Petal(size*.8f)));
-        shapeFactories.add((Float size) -> new NestedShape(new Petal(size), new NestedShape(new Petal(size*.9f), new FilledArc(size*.8f))));
-
-        return shapeFactories;
+        int randomElement = new Random().nextInt(ShapeFactories.getShapeFactories().size());
+        return ShapeFactories.getShapeFactories().get(randomElement).apply(shapeSize);
     }
 }

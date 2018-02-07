@@ -1,13 +1,11 @@
 package io.sethdaugherty.mandala.untitled1;
 
-import io.sethdaugherty.mandala.untitled1.shape.FilledArc;
-import io.sethdaugherty.mandala.untitled1.shape.MandalaShape;
-import io.sethdaugherty.mandala.untitled1.shape.NestedShape;
-import io.sethdaugherty.mandala.untitled1.shape.Petal;
-import io.sethdaugherty.mandala.untitled1.shape.factory.RingFactory;
+import io.sethdaugherty.mandala.untitled1.quad.factory.QuadFactory;
+import io.sethdaugherty.mandala.untitled1.shape.*;
+import io.sethdaugherty.mandala.untitled1.ring.factory.RingFactory;
 import processing.core.PApplet;
 
-import java.util.function.BiFunction;
+import java.util.Random;
 import java.util.function.Function;
 
 public class Main extends PApplet {
@@ -29,15 +27,15 @@ public class Main extends PApplet {
 
         paletteLibrary = new int[5][5];
         // http://colorpalettes.net/color-palette-3609/
-        paletteLibrary[0] = new int[]{ color("#b2b3b2"), color("#eed1e2"), color("#ae84a0"), color("#7f2852"), color("#0a0a18") };
+        paletteLibrary[0] = new int[]{AppletHelpers.color("#b2b3b2"), AppletHelpers.color("#eed1e2"), AppletHelpers.color("#ae84a0"), AppletHelpers.color("#7f2852"), AppletHelpers.color("#0a0a18")};
         // http://colorpalettes.net/color-palette-2754/
-        paletteLibrary[1] = new int[]{ color("#6b635b"), color("#a9c695"), color("#b1bb39"), color("#e3e79f"), color("#ededef") };
+        paletteLibrary[1] = new int[]{AppletHelpers.color("#6b635b"), AppletHelpers.color("#a9c695"), AppletHelpers.color("#b1bb39"), AppletHelpers.color("#e3e79f"), AppletHelpers.color("#ededef")};
         // http://colorpalettes.net/color-palette-3674/
-        paletteLibrary[2] = new int[]{ color("#222628"), color("#555860"), color("#a2adc2"), color("#e9e8eb"), color("#fdfdff") };
+        paletteLibrary[2] = new int[]{AppletHelpers.color("#222628"), AppletHelpers.color("#555860"), AppletHelpers.color("#a2adc2"), AppletHelpers.color("#e9e8eb"), AppletHelpers.color("#fdfdff")};
         // http://colorpalettes.net/color-palette-3670/
-        paletteLibrary[3] = new int[]{ color("#0c090b"), color("#312b2f"), color("#767f88"), color("#e4e9eb"), color("#5178ba") };
+        paletteLibrary[3] = new int[]{AppletHelpers.color("#0c090b"), AppletHelpers.color("#312b2f"), AppletHelpers.color("#767f88"), AppletHelpers.color("#e4e9eb"), AppletHelpers.color("#5178ba")};
         // http://colorpalettes.net/color-palette-3606/
-        paletteLibrary[4] = new int[]{ color("#b4d7d4"), color("#314701"), color("#6d8008"), color("#fbcc38"), color("#f5880d") };
+        paletteLibrary[4] = new int[]{AppletHelpers.color("#b4d7d4"), AppletHelpers.color("#314701"), AppletHelpers.color("#6d8008"), AppletHelpers.color("#fbcc38"), AppletHelpers.color("#f5880d")};
     }
 
     public void draw() {
@@ -73,7 +71,7 @@ public class Main extends PApplet {
     }
 
     private void drawMandala() {
-        palette = paletteLibrary[ (int)(random(paletteLibrary.length)) ];
+        palette = paletteLibrary[(int) (random(paletteLibrary.length))];
 
         background(56);
 
@@ -82,54 +80,97 @@ public class Main extends PApplet {
         //RingFactory.createRandomRing(this, 200f, 30).draw();
 
         int count = (int) random(10, 20);
-        float radius = width/2 - 200;
+        float radius = width / 2 - 200;
 
-        // Option 1: draw a specific shape
-        randomFillAndStroke();
+        int option = 3;
 
-        //RingFactory.createRing(this, radius, count, factory3).draw(this);
+        if (option == 1) {
 
-        // Option 2: draw a random ring
-        randomFillAndStroke();
-        //RingFactory.createRandomRing(this, radius, count).draw();
+            // Option 1: draw a specific shape
+            randomFillAndStroke();
+            Function<Float, ? extends MandalaShape> factory = (Float size) -> new Triangle(size * .2f, size * .3f, false);
+            factory = (Float size) -> new NestedShape(
 
-        // Option 3: draw the full mandala
+                    new FatPetal(size),
+                    new StripedArc(size)
+            );
+            factory = (Float size) -> new NestedShape(
 
-        int baseRingCount = 3;
-        for ( int i =0; i < baseRingCount; i++ ) {
+                    new FatPetal(size),
+                    new NestedShape(
+                        new FilledArc(size),
+                        new Triangle(size, size*.2f, false)
+                    )
+            );
+
+//            factory = (Float size) -> new TransformShape(
+//                    new InwardTriangle(size*.2f, size*.3f, false),
+//                    (PApplet p) -> { p.rotate()} ???? how do you pass the count, shapesize and radius parameters into this factory?
+//                    );
+
+            RingFactory.createRing(this, radius, count, factory).draw(this);
+
+        } else if (option == 2) {
+
+            // Option 2: draw a random ring
             randomFillAndStroke();
             RingFactory.createRandomRing(this, radius, count).draw(this);
-            radius = radius*.8f;
+        } else if (option == 3) {
+            // Option 3: draw the full mandala
+
+            int baseRingCount = 8;
+            for (int i = 0; i < baseRingCount; i++) {
+                randomFillAndStroke();
+                int duplications = new Random().nextInt(3)+1;
+                RingFactory.createRandomRing(this, radius, count*duplications).draw(this);
+                radius = radius * .9f;
+            }
+
+            int quadCount = 4;
+            radius = 100;
+            for (int i=0; i < quadCount; i++) {
+                randomFillAndStroke();
+                QuadFactory.createRandomQuad(this, radius).draw(this);
+                radius = radius * .85f;
+            }
+        } else if (option == 4) {
+            randomFillAndStroke();
+            Function<Float, ? extends MandalaShape> factory = (Float size) -> new NestedShape(
+                    new Petal(size),
+                    new FilledArc(size)
+
+                );
+            QuadFactory.createQuad(this, 100f, factory).draw(this);
         }
 
     }
 
     private void drawMandala2() {
-        palette = paletteLibrary[ (int)(random(paletteLibrary.length)) ];
+        palette = paletteLibrary[(int) (random(paletteLibrary.length))];
 
         background(56);
 
         // draw some "background" rings first
         int count = (int) random(10, 20);
-        float radius = width/2 - 300;
+        float radius = width / 2 - 300;
         float shapeSize = 60;
 
         int baseRingCount = 3;
-        for ( int i =0; i < baseRingCount; i++ ) {
+        for (int i = 0; i < baseRingCount; i++) {
             randomFillAndStroke();
-            radius = randomBaseRing(count*(int)random(1,2.9f), radius, shapeSize*random(.5f, 2));
+            radius = randomBaseRing(count * (int) random(1, 2.9f), radius, shapeSize * random(.5f, 2));
         }
 
 
         count = (int) random(10, 20);
-        radius = width/2 - 200;
+        radius = width / 2 - 200;
         shapeSize = 20;
 
         int ringCount = 10;
 
-        for ( int i =0; i < ringCount; i++ ) {
+        for (int i = 0; i < ringCount; i++) {
             randomFillAndStroke();
-            radius = randomRing(count*(int)random(1,2.9f), radius, shapeSize*random(.5f, 2));
+            radius = randomRing(count * (int) random(1, 2.9f), radius, shapeSize * random(.5f, 2));
         }
     }
 
@@ -141,7 +182,7 @@ public class Main extends PApplet {
             // circle
             println("drawing circle ring" + radius + " " + count + " " + shapeSize);
             circleRing(count, radius, shapeSize);
-            return radius - shapeSize*2;
+            return radius - shapeSize * 2;
         } else if (shape == 1) {
             // triangle
             triangleRing(count, radius, shapeSize, shapeSize);
@@ -151,7 +192,7 @@ public class Main extends PApplet {
         } else if (shape == 3) {
             // rect
             rectRing(count, radius, shapeSize, shapeSize);
-        } else if (shape == 4 ) {
+        } else if (shape == 4) {
             // empty ring
             emptyRing(radius);
         } else if (shape == 5) {
@@ -184,9 +225,9 @@ public class Main extends PApplet {
 
     void circleRing(float count, float ringRadius, float circleRadius) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, ringRadius);
             ellipse(0, 0, circleRadius, circleRadius);
             translate(0, -ringRadius);
@@ -198,18 +239,18 @@ public class Main extends PApplet {
 
     void roundPetalRing(float count, float ringRadius, float petalSize) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, ringRadius);
             beginShape();
             vertex(petalSize, 0); // first point
-            float c1_x = petalSize*1.5f;
+            float c1_x = petalSize * 1.5f;
             float c1_y = petalSize;
-            float c2_x = petalSize/10;
-            float c2_y = petalSize + petalSize*.6f;
+            float c2_x = petalSize / 10;
+            float c2_y = petalSize + petalSize * .6f;
             //println(c1_x + " " + c1_y + " " + c2_x + " " + c2_y + " ");
-            bezierVertex(c1_x, c1_y, c2_x, c2_y, 0, petalSize*2);
+            bezierVertex(c1_x, c1_y, c2_x, c2_y, 0, petalSize * 2);
             bezierVertex(-c2_x, c2_y, -c1_x, c1_y, -petalSize, 0);
 
             //vertex(0, 100);
@@ -224,13 +265,13 @@ public class Main extends PApplet {
 
     void sharpPetalRing(float count, float ringRadius, float petalSize) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, ringRadius);
             beginShape();
             vertex(petalSize, 0); // first point
-            bezierVertex(petalSize, petalSize, 5, petalSize, 0, petalSize*2);
+            bezierVertex(petalSize, petalSize, 5, petalSize, 0, petalSize * 2);
             bezierVertex(-5, petalSize, -petalSize, petalSize, -petalSize, 0);
 
             //vertex(0, 100);
@@ -245,13 +286,13 @@ public class Main extends PApplet {
 
     void pointedPetalRing(float count, float ringRadius, float petalSize) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, ringRadius);
             beginShape();
             vertex(petalSize, 0); // first point
-            bezierVertex(petalSize, petalSize, 5, petalSize, 0, petalSize*2);
+            bezierVertex(petalSize, petalSize, 5, petalSize, 0, petalSize * 2);
             bezierVertex(-5, petalSize, -petalSize, petalSize, -petalSize, 0);
 
             //vertex(0, 100);
@@ -266,9 +307,9 @@ public class Main extends PApplet {
 
     void linedArcRing(float count, float ringRadius, float petalSize) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, ringRadius);
             arc(0, 0, petalSize, petalSize, 0, PI, PIE);
             translate(0, -ringRadius);
@@ -276,7 +317,7 @@ public class Main extends PApplet {
         }
 
         pushMatrix();
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, ringRadius);
             line(0, 0, petalSize, 0);
             translate(0, -ringRadius);
@@ -289,11 +330,11 @@ public class Main extends PApplet {
 
     void rectRing(float count, float radius, float baseLen, float sideLen) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, radius);
-            rect(-baseLen/2, 0, baseLen, sideLen);
+            rect(-baseLen / 2, 0, baseLen, sideLen);
             translate(0, -radius);
             rotate(TWO_PI / count);
         }
@@ -303,9 +344,9 @@ public class Main extends PApplet {
 
     void inwardTriangleRing(float count, float radius, float baseLen, float sideLen) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, radius);
             pushMatrix();
             rotate(PI);
@@ -321,9 +362,9 @@ public class Main extends PApplet {
 
     void triangleRing(float count, float radius, float baseLen, float sideLen) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, radius);
             isoTriangle(baseLen, sideLen);
             translate(0, -radius);
@@ -335,9 +376,9 @@ public class Main extends PApplet {
 
     void reuleauxRing(float count, float radius, float baseLen) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, radius);
             reuleaux(baseLen);
             translate(0, -radius);
@@ -349,9 +390,9 @@ public class Main extends PApplet {
 
     void flameRing(float count, float radius, float baseLen, float sideLen) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, radius);
             flame(baseLen, sideLen);
             translate(0, -radius);
@@ -364,16 +405,16 @@ public class Main extends PApplet {
     void emptyRing(float radius) {
         pushMatrix();
         noFill();
-        translate(width*0.5f, height*0.5f);
-        arc(0, 0, radius*2, radius*2, 0, TWO_PI);
+        translate(width * 0.5f, height * 0.5f);
+        arc(0, 0, radius * 2, radius * 2, 0, TWO_PI);
         popMatrix();
     }
 
     void lineRing(float count, float radius, float lineLen) {
         pushMatrix();
-        translate(width*0.5f, height*0.5f);
+        translate(width * 0.5f, height * 0.5f);
 
-        for (int i=0; i < count; i++ ) {
+        for (int i = 0; i < count; i++) {
             translate(0, radius);
             line(0, 0, 0, lineLen);
             translate(0, -radius);
@@ -390,8 +431,7 @@ public class Main extends PApplet {
 
         float innerRadius = radius * sqrt(3) / 6;
         translate(0, innerRadius);
-        for (int n = 0; n < 3; n++)
-        {
+        for (int n = 0; n < 3; n++) {
             pushMatrix();
             //using trig, we know that the x-displacement is
             //length of displacement * cos of the angle of the displacement
@@ -401,12 +441,12 @@ public class Main extends PApplet {
             float ydisplacement = innerRadius * sin(n * TWO_PI / 3 + someRotation);
 
             //so, to centre the shape, the translation values are
-            float xpos = - xdisplacement;
-            float ypos = - ydisplacement;
+            float xpos = -xdisplacement;
+            float ypos = -ydisplacement;
             translate(xpos, ypos);
             rotate(n * TWO_PI / 3 + someRotation);
             //for sanity's sake, draw arc from 30deg above to 30deg below horizontal
-            arc(0, 0, radius, radius, -PI/6, PI/6);
+            arc(0, 0, radius, radius, -PI / 6, PI / 6);
             popMatrix();
         }
         translate(0, -innerRadius);
@@ -426,12 +466,12 @@ public class Main extends PApplet {
         curveVertex(sx, sy);
 
         sx = 0;
-        sy = sqrt( pow(sideLen, 2) - pow((float)0.5*baseLen, 2));
+        sy = sqrt(pow(sideLen, 2) - pow((float) 0.5 * baseLen, 2));
 
-        curveVertex(sx+sx/3, sideLen/3);
+        curveVertex(sx + sx / 3, sideLen / 3);
 
         sx = 0;
-        sy = sqrt( pow(sideLen, 2) - pow((float)0.5*baseLen, 2));
+        sy = sqrt(pow(sideLen, 2) - pow((float) 0.5 * baseLen, 2));
         // sidelen^2 = x^2 + (.5*baseLen)^2
         curveVertex(sx, sy);
         curveVertex(sx, sy);
@@ -442,7 +482,7 @@ public class Main extends PApplet {
 
         sx = baseLen / 2;
         sy = 0;
-        curveVertex(sx+sx/3, sideLen/3);
+        curveVertex(sx + sx / 3, sideLen / 3);
 
         curveVertex(sx, sy);
         curveVertex(sx, sy);
@@ -461,7 +501,7 @@ public class Main extends PApplet {
         vertex(sx, sy);
 
         sx = 0;
-        sy = sqrt( pow(sideLen, 2) - pow((float)0.5*baseLen, 2));
+        sy = sqrt(pow(sideLen, 2) - pow((float) 0.5 * baseLen, 2));
         // sidelen^2 = x^2 + (.5*baseLen)^2
         vertex(sx, sy);
 
@@ -490,27 +530,18 @@ public class Main extends PApplet {
 
     void randomFill() {
         int color = randomPaletteColor();
-        // these two are equivalent, but the second is faster
-        // fill( red(color), green(color), blue(color) );
-        fill( color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF);
+        Config.setFill(color);
+        AppletHelpers.setFill(color, this);
     }
 
     void randomStroke() {
         int color = randomPaletteColor();
-        // these two are equivalent, but the second is faster
-        // stroke( red(color), green(color), blue(color) );
-        stroke( color >> 16 & 0xFF, color >> 8 & 0xFF, color & 0xFF);
+        Config.setStroke(color);
+        AppletHelpers.setStroke(color, this);
     }
 
-    private static int color(String hex) {
-        return Integer.decode(hex);
-//        if (hex.charAt(0) == '#') {
-//            return Integer.parseInt(hex.substring(1), 16);
-//        }
-//        return Integer.parseInt(hex, 16);
-    }
+
 }
-
 
 /*
 color[] palette;
